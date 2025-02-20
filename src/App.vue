@@ -1,6 +1,30 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
+
+import { API_KEY, BASE_URL } from './constants/index.ts';
+
 import AppHighlights from './components/AppHighlights.vue';
 import AppWeatherSummary from './components/AppWeatherSummary.vue';
+
+const city = ref('Paris');
+const weatherInfo = ref(null);
+
+const getWeather = async () => {
+  try {
+    const responce = await fetch(`${BASE_URL}?q=${city.value}&appid=${API_KEY}`);
+    const data = await responce.json();
+    weatherInfo.value = data;
+  } catch (error) {
+    console.log(`Не удалось получить погоду ${error}`);
+  }
+};
+
+onMounted(() => {
+  getWeather();
+  setTimeout(() => {
+    console.log(weatherInfo.value);
+  }, 3000);
+});
 </script>
 
 <template>
@@ -12,9 +36,9 @@ import AppWeatherSummary from './components/AppWeatherSummary.vue';
             <section class="section section-left">
               <div class="info">
                 <div class="city-inner">
-                  <input type="text" class="search" />
+                  <input @keyup="getWeather" v-model="city" type="text" class="search" />
                 </div>
-                <AppWeatherSummary />
+                <AppWeatherSummary :weatherInfo="weatherInfo" />
               </div>
             </section>
             <section class="section section-right">
